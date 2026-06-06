@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 public interface AsignacionDAO {
-    void insertar(Asignacion asignacion) throws SQLException;
-    List<Asignacion> listarTodos() throws SQLException;
-    void eliminar(int id) throws SQLException;
+    void insert(Asignacion asignacion) throws SQLException;
+    List<Asignacion> findAll() throws SQLException;
+    void delete(int id) throws SQLException;
 }
