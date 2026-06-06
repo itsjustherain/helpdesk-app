@@ -1,0 +1,2 @@
+-- Helpdesk App - Database Schema
+-- To be completed in next step
