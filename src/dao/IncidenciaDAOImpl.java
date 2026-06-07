@@ -4,6 +4,7 @@ import db.ConexionDB;
 import model.Incidencia;
 import model.Prioridad;
 import model.Estado;
+import dto.IncidenciaDTO;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -48,6 +49,30 @@ public class IncidenciaDAOImpl implements IncidenciaDAO {
                 }
         }
         return incidencias;
+    }
+
+    @Override
+    public List<IncidenciaDTO> findAllWithDetails() throws SQLException {
+        String sql = "SELECT i.id, CONCAT(u.nombre, ' ', u.apellidos) AS nombreEmpleado, i.titulo, i.descripcion, i.prioridad, i.estado, i.fecha_creacion " +
+                     "FROM incidencias i JOIN empleados e ON i.empleado_id = e.usuario_id JOIN usuarios u ON e.usuario_id = u.id";
+        List<IncidenciaDTO> lista = new ArrayList<>();
+
+        try (Connection conn = ConexionDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                lista.add(new IncidenciaDTO(
+                    rs.getInt("id"),
+                    rs.getString("nombreEmpleado"),
+                    rs.getString("titulo"),
+                    rs.getString("descripcion"),
+                    Prioridad.valueOf(rs.getString("prioridad")),
+                    Estado.valueOf(rs.getString("estado")),
+                    rs.getTimestamp("fecha_creacion").toLocalDateTime()
+                ));
+            }
+        }
+        return lista;
     }
 
     @Override

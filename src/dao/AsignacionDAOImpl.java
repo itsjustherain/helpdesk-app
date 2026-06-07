@@ -2,6 +2,7 @@ package dao;
 
 import db.ConexionDB;
 import model.Asignacion;
+import dto.AsignacionDTO;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -42,6 +43,28 @@ public class AsignacionDAOImpl implements AsignacionDAO {
                 }
         }
         return asignaciones;
+    }
+
+    @Override
+    public List<AsignacionDTO> findAllWithDetails() throws SQLException {
+        String sql = "SELECT a.id, i.titulo AS incidenciaTitulo, CONCAT(u.nombre, ' ', u.apellidos) AS tecnicoNombre, a.fecha_asignacion, a.comentario " +
+                     "FROM asignaciones a JOIN incidencias i ON a.incidencia_id = i.id JOIN tecnicos t ON a.tecnico_id = t.usuario_id JOIN usuarios u ON t.usuario_id = u.id";
+        List<AsignacionDTO> lista = new ArrayList<>();
+
+        try (Connection conn = ConexionDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                lista.add(new AsignacionDTO(
+                    rs.getInt("id"),
+                    rs.getString("incidenciaTitulo"),
+                    rs.getString("tecnicoNombre"),
+                    rs.getTimestamp("fecha_asignacion").toLocalDateTime(),
+                    rs.getString("comentario")
+                ));
+            }
+        }
+        return lista;
     }
 
     @Override
