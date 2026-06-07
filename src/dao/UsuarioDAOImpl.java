@@ -43,7 +43,7 @@ public class UsuarioDAOImpl implements UsuarioDAO {
         String sql = "INSERT INTO usuarios (username, password, email, nombre, apellidos, dni, rol) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         try (Connection conn = ConexionDB.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
+            PreparedStatement ps = conn.prepareStatement(sql)) {
 
             ps.setString(1, usuario.getUsername());
             ps.setString(2, usuario.getPassword());
