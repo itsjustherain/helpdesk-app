@@ -1,12 +1,15 @@
 import db.ConexionDB;
+import view.Login;
+
 import java.sql.Connection;
 
 public class Main {
     public static void main(String[] args) {
-        try (Connection conn = ConexionDB.getConnection()) {
-            System.out.println("Connection successful!");
-        } catch (Exception e) {
-            System.out.println("Connection failed: " + e.getMessage());
-        }
+        // try (Connection conn = ConexionDB.getConnection()) {
+        //     System.out.println("Connection successful!");
+        // } catch (Exception e) {
+        //     System.out.println("Connection failed: " + e.getMessage());
+        // }
+        Login l = new Login();
     }
 }
