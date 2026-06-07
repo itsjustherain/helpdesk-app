@@ -1,39 +1,38 @@
 package dao;
 
 import db.ConexionDB;
-import model.Empleado;
+import model.Tecnico;
 import model.Rol;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EmpleadoDAOImpl implements EmpleadoDAO {
+public class TecnicoDAOImpl implements TecnicoDAO {
 
     @Override
-    public void insert(Empleado empleado) throws SQLException {
-        String sql = "INSERT INTO empleados (usuario_id, departamento, telefono) VALUES (?, ?, ?)";
+    public void insert(Tecnico tecnico) throws SQLException {
+        String sql = "INSERT INTO tecnicos (usuario_id, especialidad) VALUES (?, ?)";
 
         try (Connection conn = ConexionDB.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setInt(1,empleado.getId());
-                ps.setString(2, empleado.getDepartamento());
-                ps.setString(3, empleado.getTelefono());
+                ps.setInt(1, tecnico.getId());
+                ps.setString(2, tecnico.getEspecialidad());
 
                 ps.executeUpdate();
         }
     }
 
     @Override
-    public List<Empleado> findAll() throws SQLException {
-        String sql = "SELECT u.id, u.username, u.password, u.email, u.nombre, u.apellidos, u.dni, u.rol, e.departamento, e.telefono FROM usuarios u JOIN empleados e ON u.id = e.usuario_id";
-        List<Empleado> empleados = new ArrayList<>();
-
+    public List<Tecnico> findAll() throws SQLException {
+        String sql = "SELECT u.id, u.username, u.password, u.email, u.nombre, u.apellidos, u.dni, u.rol, t.especialidad FROM usuarios u JOIN tecnicos t ON u.id = t.usuario_id";
+        List<Tecnico> tecnicos = new ArrayList<>();
+        
         try (Connection conn = ConexionDB.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);
             ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    empleados.add(new Empleado(
+                    tecnicos.add(new Tecnico(
                         rs.getInt("id"),
                         rs.getString("username"),
                         rs.getString("password"),
@@ -42,31 +41,29 @@ public class EmpleadoDAOImpl implements EmpleadoDAO {
                         rs.getString("apellidos"),
                         rs.getString("dni"),
                         Rol.valueOf(rs.getString("rol")),
-                        rs.getString("departamento"),
-                        rs.getString("telefono")
+                        rs.getString("especialidad")
                     ));
-                } 
-        }
-        return empleados;
+                }
+        } 
+        return tecnicos;
     }
 
     @Override
-    public void update(Empleado empleado) throws SQLException {
-        String sql = "UPDATE usuarios u JOIN empleados e ON u.id = e.usuario_id SET u.username=?, u.password=?, u.email=?, u.nombre=?, u.apellidos=?, u.dni=?, e.departamento=?, e.telefono=? WHERE u.id=?";
+    public void update(Tecnico tecnico) throws SQLException {
+        String sql = "UPDATE usuarios u JOIN tecnicos t ON u.id = t.usuario_id SET u.username=?, u.password=?, u.email=?, u.nombre=?, u.apellidos=?, u.dni=?, t.especialidad=? WHERE u.id=?";
 
         try (Connection conn = ConexionDB.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setString(1, empleado.getUsername());
-                ps.setString(2, empleado.getPassword());
-                ps.setString(3, empleado.getEmail());
-                ps.setString(4, empleado.getNombre());
-                ps.setString(5, empleado.getApellidos());
-                ps.setString(6, empleado.getDni());
-                ps.setString(7, empleado.getDepartamento());
-                ps.setString(8, empleado.getTelefono());
-                ps.setInt(9, empleado.getId());
+                ps.setString(1, tecnico.getUsername());
+                ps.setString(2, tecnico.getPassword());
+                ps.setString(3, tecnico.getEmail());
+                ps.setString(4, tecnico.getNombre());
+                ps.setString(5, tecnico.getApellidos());
+                ps.setString(6, tecnico.getDni());
+                ps.setString(7, tecnico.getEspecialidad());
+                ps.setInt(8, tecnico.getId());
 
-                ps.executeUpdate();   
+                ps.executeUpdate();
         }
     }
 
@@ -82,16 +79,16 @@ public class EmpleadoDAOImpl implements EmpleadoDAO {
     }
 
     @Override
-    public Empleado findById(int id) throws SQLException {
-        String sql = "SELECT u.id, u.username, u.password, u.email, u.nombre, u.apellidos, u.dni, u.rol, e.departamento, e.telefono FROM usuarios u JOIN empleados e ON u.id = e.usuario_id WHERE u.id=?";
+    public Tecnico findById(int id) throws SQLException {
+        String sql = "SELECT u.id, u.username, u.password, u.email, u.nombre, u.apellidos, u.dni, u.rol, t.especialidad FROM usuarios u JOIN tecnicos t ON u.id = t.usuario_id WHERE u.id=?";
 
         try (Connection conn = ConexionDB.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, id);
-                
+
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        return new Empleado(
+                        return new Tecnico(
                             rs.getInt("id"),
                             rs.getString("username"),
                             rs.getString("password"),
@@ -100,12 +97,11 @@ public class EmpleadoDAOImpl implements EmpleadoDAO {
                             rs.getString("apellidos"),
                             rs.getString("dni"),
                             Rol.valueOf(rs.getString("rol")),
-                            rs.getString("departamento"),
-                            rs.getString("telefono")
+                            rs.getString("especialidad")
                         );
                     }
                 }
-        }    
+        }
         return null;
     }
 }
