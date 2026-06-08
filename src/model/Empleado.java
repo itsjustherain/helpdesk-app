@@ -11,6 +11,7 @@ public class Empleado extends Usuario {
         this.telefono = telefono;
     }
 
+    /** Constructor with id — used when reading from the DB or inserting the child row after register() */
     public Empleado(int id, String username, String password, String email, String nombre, String apellidos, String dni,
             Rol rol, String departamento, String telefono) {
         super(id, username, password, email, nombre, apellidos, dni, rol);

@@ -10,6 +10,7 @@ public class Tecnico extends Usuario{
         this.especialidad = especialidad;
     }
 
+    /** Constructor with id — used when reading from the DB or inserting the child row after register() */
     public Tecnico(int id, String username, String password, String email, String nombre, String apellidos, String dni,
             Rol rol, String especialidad) {
         super(id, username, password, email, nombre, apellidos, dni, rol);

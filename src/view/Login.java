@@ -12,12 +12,10 @@ import java.sql.SQLException;
 
 public class Login extends JFrame {
 
-    private JLabel lblUsername;
-    private JLabel lblPassword;
+    private JLabel lblUsername, lblPassword;
     private JTextField txtUsername;
     private JPasswordField txtPassword;
-    private JButton btnLogin;
-    private JButton btnRegister;
+    private JButton btnLogin, btnRegister;
 
     public Login() {
         setTitle("Helpdesk - Login");
@@ -62,7 +60,8 @@ public class Login extends JFrame {
         });
 
         btnRegister.addActionListener(e -> {
-            // Open registration window
+            new Register();
+            dispose();
         });
         setVisible(true);
     }
