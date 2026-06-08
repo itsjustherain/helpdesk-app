@@ -1,5 +1,5 @@
 package model;
 
 public enum Estado {
-    ABIERTA, EN_PROCESO, RESUELTA
+    ABIERTA, EN_PROGRESO, RESUELTA
 }

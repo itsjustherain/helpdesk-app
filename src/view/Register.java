@@ -135,6 +135,23 @@ public class Register extends JFrame {
                 return;
             }
 
+            // Validate that no field is left empty
+            if (username.isEmpty() || password.isEmpty() || email.isEmpty() ||
+                nombre.isEmpty() || apellidos.isEmpty() || dni.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill in all fields", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (rol == Rol.EMPLEADO && (txtDepartamento.getText().isEmpty() || txtTelefono.getText().isEmpty())) {
+                JOptionPane.showMessageDialog(this, "Please fill in departamento and telefono", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            if (rol == Rol.TECNICO && txtEspecialidad.getText().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Please fill in especialidad", "Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
             // Use interfaces as types — good DAO pattern practice
             UsuarioDAO usuarioDAO = new UsuarioDAOImpl();
             EmpleadoDAO empleadoDAO = new EmpleadoDAOImpl();

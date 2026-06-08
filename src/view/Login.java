@@ -52,7 +52,8 @@ public class Login extends JFrame {
                 if (usuario == null) {
                     JOptionPane.showMessageDialog(this, "Invalid username or password", "Error", JOptionPane.ERROR_MESSAGE);
                 } else {
-                    // abrir dashboard
+                    dispose();
+                    new Dashboard(usuario);
                 }
             } catch (SQLException ex) {
                 JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
