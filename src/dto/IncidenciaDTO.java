@@ -4,18 +4,26 @@ import java.time.LocalDateTime;
 import model.Prioridad;
 import model.Estado;
 
+/**
+ * DTO (Data Transfer Object) for Incidencia.
+ * Used when a JOIN is needed to include the employee's full name.
+ * Unlike Incidencia (which stores empleadoId as a FK), this carries
+ * nombreEmpleado as a readable string — suitable for displaying in tables.
+ */
 public class IncidenciaDTO {
     private int id;
-    private String nombreEmpleado;
+    private String nombreEmpleado; // full name from the JOIN with usuarios
     private String titulo;
     private String descripcion;
     private Prioridad prioridad;
     private Estado estado;
     private LocalDateTime fechaCreacion;
-    
+
+    /** No-arg constructor required for manual field-by-field population. */
     public IncidenciaDTO() {
     }
 
+    /** Full constructor — used by IncidenciaDAOImpl when mapping a ResultSet row. */
     public IncidenciaDTO(int id, String nombreEmpleado, String titulo, String descripcion, Prioridad prioridad,
             Estado estado, LocalDateTime fechaCreacion) {
         this.id = id;

@@ -17,6 +17,9 @@ public interface IncidenciaDAO {
     /** Returns all incidents with employee name via JOIN */
     List<IncidenciaDTO> findAllWithDetails() throws SQLException;
 
+    /** Returns only the incidents of a given employee (with employee name) via JOIN */
+    List<IncidenciaDTO> findByEmpleado(int empleadoId) throws SQLException;
+
     /** Updates an existing incident */
     void update(Incidencia incidencia) throws SQLException;
 

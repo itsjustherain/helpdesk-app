@@ -2,8 +2,14 @@ package dto;
 
 import java.time.LocalDateTime;
 
+/**
+ * DTO (Data Transfer Object) for Asignacion.
+ * Used when a JOIN is needed to include the incident title and technician's full name.
+ * Unlike Asignacion, this carries readable names instead of raw foreign key ids.
+ */
 public class AsignacionDTO {
-    private int id;
+    private int id;             // id de la asignación (0 si la incidencia no tiene ninguna)
+    private int incidenciaId;   // id de la incidencia (siempre presente)
     private String incidenciaTitulo;
     private String tecnicoNombre;
     private LocalDateTime fechaAsignacion;
@@ -26,6 +32,14 @@ public class AsignacionDTO {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getIncidenciaId() {
+        return incidenciaId;
+    }
+
+    public void setIncidenciaId(int incidenciaId) {
+        this.incidenciaId = incidenciaId;
     }
 
     public String getIncidenciaTitulo() {

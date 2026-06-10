@@ -1,5 +1,9 @@
 package model;
 
+/**
+ * Extends Usuario — maps to the empleados table (Joined Table Inheritance).
+ * Adds departamento and telefono fields specific to employees.
+ */
 public class Empleado extends Usuario {
     private String departamento, telefono;
 
@@ -19,20 +23,9 @@ public class Empleado extends Usuario {
         this.telefono = telefono;
     }
 
-    public String getDepartamento() {
-        return departamento;
-    }
+    public String getDepartamento() { return departamento; }
+    public void setDepartamento(String departamento) { this.departamento = departamento; }
 
-    public void setDepartamento(String departamento) {
-        this.departamento = departamento;
-    }
-
-    public String getTelefono() {
-        return telefono;
-    }
-
-    public void setTelefono(String telefono) {
-        this.telefono = telefono;
-    }
-    
+    public String getTelefono() { return telefono; }
+    public void setTelefono(String telefono) { this.telefono = telefono; }
 }

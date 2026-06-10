@@ -4,10 +4,11 @@ import view.Login;
 public class Main {
     public static void main(String[] args) {
         try {
-            UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatDarkLaf());
-        } catch (Exception e) {
-            e.printStackTrace();
+            UIManager.setLookAndFeel("com.formdev.flatlaf.FlatDarkLaf");
+        } catch (ReflectiveOperationException | javax.swing.UnsupportedLookAndFeelException e) {
+            // Si FlatLaf no está disponible la app arranca con el L&F por defecto
         }
-        new Login();
+        Login login = new Login();
+        login.setVisible(true);
     }
 }

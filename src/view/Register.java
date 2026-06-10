@@ -14,12 +14,14 @@ import dao.TecnicoDAOImpl;
 import dao.UsuarioDAO;
 import dao.UsuarioDAOImpl;
 import db.ConexionDB;
+import util.Validador;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+/** Registration window — allows creating a new EMPLEADO or TECNICO account */
 public class Register extends JFrame {
 
     private JLabel lblUsername, lblPassword, lblEmail, lblNombre, lblApellidos, lblDni, lblRol;
@@ -28,7 +30,8 @@ public class Register extends JFrame {
     private JComboBox<Rol> cmbRol;
     private JButton btnRegister, btnBack;
 
-    // Dynamic fields — shown depending on the selected role
+    // Dynamic fields — declared as fields because they are accessed from both
+    // the ItemListener (to add them to the panel) and the ActionListener (to read their values)
     private JLabel lblDepartamento, lblTelefono, lblEspecialidad;
     private JTextField txtDepartamento, txtTelefono, txtEspecialidad;
 
@@ -37,7 +40,9 @@ public class Register extends JFrame {
         setSize(450, 360);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        setResizable(false); // prevent resizing and fullscreen
 
+        // ── Labels and fields ─────────────────────────────────────────────────
         lblUsername = new JLabel("Username:");
         lblPassword = new JLabel("Password:");
         lblEmail = new JLabel("Email:");
@@ -52,9 +57,13 @@ public class Register extends JFrame {
         txtNombre = new JTextField(20);
         txtApellidos = new JTextField(20);
         txtDni = new JTextField(20);
+
+        // Rol.values() fills the combo with all enum values (EMPLEADO, TECNICO)
+        // setSelectedIndex(-1) so no option is pre-selected by default
         cmbRol = new JComboBox<>(Rol.values());
         cmbRol.setSelectedIndex(-1);
 
+        // Dynamic fields — only shown after a role is selected
         lblDepartamento = new JLabel("Departamento:");
         lblTelefono = new JLabel("Telefono:");
         lblEspecialidad = new JLabel("Especialidad:");
@@ -65,6 +74,8 @@ public class Register extends JFrame {
         btnRegister = new JButton("Register");
         btnBack = new JButton("Back");
 
+        // ── Static panel (always visible) ─────────────────────────────────────
+        // GridLayout(7, 2) — 7 rows, 2 columns (label + field per row)
         JPanel panelMain = new JPanel(new GridLayout(7, 2, 10, 10));
         panelMain.setBorder(BorderFactory.createEmptyBorder(20, 40, 10, 40));
         panelMain.add(lblUsername);
@@ -82,29 +93,34 @@ public class Register extends JFrame {
         panelMain.add(lblRol);
         panelMain.add(cmbRol);
 
+        // ── Dynamic panel (changes based on selected role) ────────────────────
         JPanel panelDinamico = new JPanel(new GridLayout(2, 2, 10, 10));
         panelDinamico.setBorder(BorderFactory.createEmptyBorder(10, 40, 10, 40));
 
+        // ── Buttons panel ─────────────────────────────────────────────────────
         JPanel panelBotones = new JPanel(new GridLayout(1, 2, 10, 10));
         panelBotones.setBorder(BorderFactory.createEmptyBorder(0, 40, 20, 40));
         panelBotones.add(btnRegister);
         panelBotones.add(btnBack);
 
-        // Show/hide dynamic fields depending on the selected role
+        // ── Role selector listener ────────────────────────────────────────────
+        // Fires every time the selected item changes
+        // removeAll() clears the dynamic panel before adding the new fields
+        // revalidate() + repaint() force Swing to re-render the panel
         cmbRol.addItemListener(e -> {
             panelDinamico.removeAll();
             Rol rolSeleccionado = (Rol) cmbRol.getSelectedItem();
 
             if (rolSeleccionado == Rol.EMPLEADO) {
-                panelDinamico.setLayout(new GridLayout(2, 2, 10, 10));
-                setSize(450, 440);
+                panelDinamico.setLayout(new GridLayout(2, 2, 10, 10)); // 2 fields
+                setSize(450, 440); // taller window for 2 extra fields
                 panelDinamico.add(lblDepartamento);
                 panelDinamico.add(txtDepartamento);
                 panelDinamico.add(lblTelefono);
                 panelDinamico.add(txtTelefono);
             } else if (rolSeleccionado == Rol.TECNICO) {
-                panelDinamico.setLayout(new GridLayout(1, 2, 10, 10));
-                setSize(450, 400);
+                panelDinamico.setLayout(new GridLayout(1, 2, 10, 10)); // 1 field
+                setSize(450, 400); // slightly taller for 1 extra field
                 panelDinamico.add(lblEspecialidad);
                 panelDinamico.add(txtEspecialidad);
             }
@@ -113,16 +129,22 @@ public class Register extends JFrame {
             panelDinamico.repaint();
         });
 
+        // ── Layout container ──────────────────────────────────────────────────
+        // BorderLayout splits the window into 3 vertical sections
         JPanel container = new JPanel(new BorderLayout());
         container.add(panelMain, BorderLayout.NORTH);
         container.add(panelDinamico, BorderLayout.CENTER);
         container.add(panelBotones, BorderLayout.SOUTH);
-
         add(container);
 
-        // Register button — runs the 3 inserts inside a single transaction
+        // ── Register button ───────────────────────────────────────────────────
+        // Validates all fields, then runs 2-3 inserts inside a single transaction:
+        // 1. INSERT into usuarios (gets generated id)
+        // 2. INSERT into empleados or tecnicos using that id
+        // If any insert fails, rollback undoes everything
         btnRegister.addActionListener(e -> {
             String username = txtUsername.getText();
+            // getPassword() returns char[] for security — convert to String for DB
             String password = String.valueOf(txtPassword.getPassword());
             String email = txtEmail.getText();
             String nombre = txtNombre.getText();
@@ -130,25 +152,32 @@ public class Register extends JFrame {
             String dni = txtDni.getText();
             Rol rol = (Rol) cmbRol.getSelectedItem();
 
+            // Primero hay que haber seleccionado un rol
             if (rol == null) {
-                JOptionPane.showMessageDialog(this, "Please select a role", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Selecciona un rol", "Datos no válidos", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // Validate that no field is left empty
-            if (username.isEmpty() || password.isEmpty() || email.isEmpty() ||
-                nombre.isEmpty() || apellidos.isEmpty() || dni.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please fill in all fields", "Error", JOptionPane.ERROR_MESSAGE);
+            // Validación de los campos comunes de usuario (al registrarse la contraseña es obligatoria).
+            // Reutiliza las mismas reglas que el resto de formularios (clase Validador).
+            String error = Validador.validarUsuario(username, password, email, nombre, apellidos, dni, true);
+            if (error != null) {
+                JOptionPane.showMessageDialog(this, error, "Datos no válidos", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            if (rol == Rol.EMPLEADO && (txtDepartamento.getText().isEmpty() || txtTelefono.getText().isEmpty())) {
-                JOptionPane.showMessageDialog(this, "Please fill in departamento and telefono", "Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            if (rol == Rol.TECNICO && txtEspecialidad.getText().isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please fill in especialidad", "Error", JOptionPane.ERROR_MESSAGE);
+            // Validación de los campos específicos según el rol
+            if (rol == Rol.EMPLEADO) {
+                if (!Validador.noVacio(txtDepartamento.getText())) {
+                    JOptionPane.showMessageDialog(this, "El departamento es obligatorio.", "Datos no válidos", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+                if (!Validador.esTelefono(txtTelefono.getText().trim())) {
+                    JOptionPane.showMessageDialog(this, "El teléfono debe tener 9 dígitos.", "Datos no válidos", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            } else if (rol == Rol.TECNICO && !Validador.noVacio(txtEspecialidad.getText())) {
+                JOptionPane.showMessageDialog(this, "La especialidad es obligatoria.", "Datos no válidos", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
@@ -158,20 +187,22 @@ public class Register extends JFrame {
             TecnicoDAO tecnicoDAO = new TecnicoDAOImpl();
 
             try (Connection conn = ConexionDB.getConnection()) {
-                // Disable autocommit to manage the transaction manually
+                // Disable autocommit — we manage the transaction manually
                 conn.setAutoCommit(false);
 
                 try {
-                    // Insert into usuarios — the DAO sets the generated id on the object
+                    // Step 1: insert into usuarios — DAO sets the generated id on the object
                     Usuario usuario = new Usuario(username, password, email, nombre, apellidos, dni, rol);
                     usuarioDAO.register(usuario, conn);
 
-                    // Insert into the child table depending on the role
+                    // Step 2: insert into the child table using the generated id
                     if (rol == Rol.EMPLEADO) {
-                        Empleado emp = new Empleado(usuario.getId(), username, password, email, nombre, apellidos, dni, rol,txtDepartamento.getText(), txtTelefono.getText());
+                        Empleado emp = new Empleado(usuario.getId(), username, password, email, nombre, apellidos, dni, rol,
+                                                    txtDepartamento.getText(), txtTelefono.getText());
                         empleadoDAO.insert(emp, conn);
                     } else {
-                        Tecnico tec = new Tecnico(usuario.getId(), username, password, email, nombre, apellidos, dni, rol, txtEspecialidad.getText());
+                        Tecnico tec = new Tecnico(usuario.getId(), username, password, email, nombre, apellidos, dni, rol,
+                                                  txtEspecialidad.getText());
                         tecnicoDAO.insert(tec, conn);
                     }
 
@@ -179,10 +210,11 @@ public class Register extends JFrame {
                     conn.commit();
                     JOptionPane.showMessageDialog(this, "User registered successfully!");
                     dispose();
-                    new Login();
+                    Login loginAfterRegister = new Login();
+                    loginAfterRegister.setVisible(true);
 
                 } catch (SQLException ex) {
-                    // Something failed — undo all changes
+                    // Something failed — rollback undoes all inserts in this transaction
                     conn.rollback();
                     JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                 }
@@ -191,10 +223,11 @@ public class Register extends JFrame {
             }
         });
 
-        // Back button — close this window and reopen Login
+        // Back button — close this window and return to Login
         btnBack.addActionListener(e -> {
             dispose();
-            new Login();
+            Login loginBack = new Login();
+            loginBack.setVisible(true);
         });
 
         setVisible(true);

@@ -86,18 +86,53 @@ public class IncidenciaDAOImpl implements IncidenciaDAO {
         return lista;
     }
 
-    /** Updates title, description, priority and status of an existing incident */
+    /**
+     * Returns only the incidents created by a given employee, with the employee's
+     * full name via JOIN. Used so an EMPLEADO only sees their own tickets.
+     */
     @Override
-    public void update(Incidencia incidencia) throws SQLException {
-        String sql = "UPDATE incidencias SET titulo=?, descripcion=?, prioridad=?, estado=? WHERE id=?";
+    public List<IncidenciaDTO> findByEmpleado(int empleadoId) throws SQLException {
+        String sql = "SELECT i.id, CONCAT(u.nombre, ' ', u.apellidos) AS nombreEmpleado, " +
+                     "i.titulo, i.descripcion, i.prioridad, i.estado, i.fecha_creacion " +
+                     "FROM incidencias i " +
+                     "JOIN empleados e ON i.empleado_id = e.usuario_id " +
+                     "JOIN usuarios u ON e.usuario_id = u.id " +
+                     "WHERE i.empleado_id = ?";
+        List<IncidenciaDTO> lista = new ArrayList<>();
 
         try (Connection conn = ConexionDB.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, incidencia.getTitulo());
-            ps.setString(2, incidencia.getDescripcion());
-            ps.setString(3, incidencia.getPrioridad().name());
-            ps.setString(4, incidencia.getEstado().name());
-            ps.setInt(5, incidencia.getId());
+            ps.setInt(1, empleadoId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    lista.add(new IncidenciaDTO(
+                        rs.getInt("id"),
+                        rs.getString("nombreEmpleado"),
+                        rs.getString("titulo"),
+                        rs.getString("descripcion"),
+                        Prioridad.valueOf(rs.getString("prioridad")),
+                        Estado.valueOf(rs.getString("estado")),
+                        rs.getTimestamp("fecha_creacion").toLocalDateTime()
+                    ));
+                }
+            }
+        }
+        return lista;
+    }
+
+    /** Updates the employee, title, description, priority and status of an existing incident */
+    @Override
+    public void update(Incidencia incidencia) throws SQLException {
+        String sql = "UPDATE incidencias SET empleado_id=?, titulo=?, descripcion=?, prioridad=?, estado=? WHERE id=?";
+
+        try (Connection conn = ConexionDB.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, incidencia.getEmpleadoId());
+            ps.setString(2, incidencia.getTitulo());
+            ps.setString(3, incidencia.getDescripcion());
+            ps.setString(4, incidencia.getPrioridad().name());
+            ps.setString(5, incidencia.getEstado().name());
+            ps.setInt(6, incidencia.getId());
             ps.executeUpdate();
         }
     }

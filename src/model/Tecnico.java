@@ -1,6 +1,10 @@
 package model;
 
-public class Tecnico extends Usuario{
+/**
+ * Extends Usuario — maps to the tecnicos table (Joined Table Inheritance).
+ * Adds the especialidad field specific to technicians.
+ */
+public class Tecnico extends Usuario {
     private String especialidad;
 
     public Tecnico() {
@@ -17,11 +21,6 @@ public class Tecnico extends Usuario{
         this.especialidad = especialidad;
     }
 
-    public String getEspecialidad() {
-        return especialidad;
-    }
-
-    public void setEspecialidad(String especialidad) {
-        this.especialidad = especialidad;
-    }
+    public String getEspecialidad() { return especialidad; }
+    public void setEspecialidad(String especialidad) { this.especialidad = especialidad; }
 }
